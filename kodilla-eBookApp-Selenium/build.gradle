@@ -9,10 +9,33 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
-    compile(group: 'com.github.lewka', name: 'ocular', version: '1.0.5') {
-        exclude group: "net.sf", module: "jargs"
-    }
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+ext {
+    junitJupiterVersion = "5.5.2"
+    seleniumJavaVersion = "3.141.59"
 }
+
+dependencies {
+/* JUnit 5 */
+    testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+    testCompile("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+    /* Optional dependency for parameterized tests */
+    testCompile("org.junit.jupiter:junit-jupiter-params:${junitJupiterVersion}")
+    /* Selenium */
+    testCompile("org.seleniumhq.selenium:selenium-java:${seleniumJavaVersion}")
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.141.59'
+    /* Selenium-Jupiter */
+    testCompile("io.github.bonigarcia:selenium-jupiter:3.3.4")
+}
+
+
+ext {
+    logbackVersion = "1.2.3"
+}
+
+dependencies {
+    testCompile("ch.qos.logback:logback-core:${logbackVersion}")
+    testCompile("ch.qos.logback:logback-classic:${logbackVersion}")
+}
+
+
+
