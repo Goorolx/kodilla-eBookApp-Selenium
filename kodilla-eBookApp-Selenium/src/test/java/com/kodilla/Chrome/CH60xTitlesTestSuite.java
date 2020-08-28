@@ -1,4 +1,5 @@
 package com.kodilla.Chrome;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.openqa.selenium.By;
 
@@ -24,9 +25,8 @@ public class CH60xTitlesTestSuite {
 
 
     @Test
-    public void shouldAddNewTitle(ChromeDriver driver){
+    public void t501shouldAdd2NewTitle(ChromeDriver driver) {
         //given
-
         WebDriverWait wait = new WebDriverWait(driver, 5);
         driver.get("https://ta-ebookrental-fe.herokuapp.com/");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
@@ -41,6 +41,7 @@ public class CH60xTitlesTestSuite {
 
         //when
         //Adding new Title
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
         WebElement addTitle = driver.findElement(By.cssSelector("#add-title-button"));
         addTitle.click();
@@ -49,17 +50,16 @@ public class CH60xTitlesTestSuite {
         driver.findElement(By.xpath("//input[@name='author']")).sendKeys(author);
         driver.findElement(By.xpath("//input[@name='year']")).sendKeys(year.toString());
 
-        addTitle = driver.findElement(By.xpath("//*[@name='submit-button']"));
-        addTitle.click();
+        driver.findElement(By.xpath("//*[@name='submit-button']")).click();
 
         //Adding second title
-        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#add-title-button")));
         WebElement addTitle2 = driver.findElement(By.cssSelector("#add-title-button"));
         addTitle2.click();
 
-        Integer newYear = year+2;
-        driver.findElement(By.xpath("//input[@name='title']")).sendKeys(title+2);
+        Integer newYear = year + 2;
+        driver.findElement(By.xpath("//input[@name='title']")).sendKeys(title + 2);
         driver.findElement(By.xpath("//input[@name='author']")).sendKeys(author);
         driver.findElement(By.xpath("//input[@name='year']")).sendKeys(newYear.toString());
 
@@ -67,9 +67,22 @@ public class CH60xTitlesTestSuite {
         addTitle2.click();
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
-        List<WebElement> list = driver.findElementsByXPath("//li[contains(@id,'title-')]");
+        List<WebElement> listTitles = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
+        List<WebElement> listAuthor = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[2]");
+        List<WebElement> listYear = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[3]");
         //then
-        Assertions.assertEquals(2,list.size()); // List should contain 2 elements
+        Assertions.assertEquals(4,listTitles.size()); // List should contain 2 elements
+
+        for (int i = 0; i < listTitles.size(); i++)   // checking if titles are added correctly
+            if(i%2==0) Assertions.assertTrue((title).equalsIgnoreCase(listTitles.get(i).getText()));
+            else Assertions.assertTrue((title+2).equalsIgnoreCase((listTitles.get(i).getText())));
+
+        for (int i=0;i<listAuthor.size();i++) { // checking if author is corect
+           Assertions.assertTrue(("by "+author).equalsIgnoreCase(listAuthor.get(i).getText()));}
+
+        for (int i=0;i<listYear.size();i++)  //Checking if year is correct
+            if(i%2==0) Assertions.assertEquals(("("+year+")"),listYear.get(i).getText());
+            else Assertions.assertEquals(("("+newYear+")"),listYear.get(i).getText());
 
     }
 }
