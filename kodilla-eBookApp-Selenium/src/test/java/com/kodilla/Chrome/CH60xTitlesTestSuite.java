@@ -158,4 +158,40 @@ public class CH60xTitlesTestSuite {
         List<WebElement> listYearAfter = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[3]");
         Assertions.assertEquals(listYearBefore, listYearAfter); //Comparing lists, checking if title is added
     }
+
+    @Test
+    public void t603shouldReturnCorrectTitles(ChromeDriver driver) {
+
+    //given
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
+
+        //log in to system, I should get to titles page
+        WebElement log = driver.findElement(By.id("login"));
+        log.sendKeys(logingx);
+        WebElement pwd = driver.findElement(By.name("password"));
+        pwd.sendKeys(pwdgx);
+        WebElement button = driver.findElement(By.id("login-btn"));
+        button.click();
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+        List<WebElement> listTitles = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
+        List<WebElement> listAuthor = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[2]");
+        List<WebElement> listYear = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[3]");
+        //then
+        Assertions.assertEquals(4, listTitles.size()); // List should contain 2 elements or more depends hwo many times i ran methods
+
+        for (int i = 0; i < listTitles.size(); i++)   // checking if titles are added correctly
+            if (i % 2 == 0) Assertions.assertTrue((title).equalsIgnoreCase(listTitles.get(i).getText()));
+            else Assertions.assertTrue((title + 2).equalsIgnoreCase((listTitles.get(i).getText())));
+
+        for (int i = 0; i < listAuthor.size(); i++)  // checking if author is correct
+            Assertions.assertTrue(("by " + author).equalsIgnoreCase(listAuthor.get(i).getText()));
+
+        for (int i = 0; i < listYear.size(); i++)  //Checking if year is correct
+            if (i % 2 == 0) Assertions.assertEquals(("(" + year + ")"), listYear.get(i).getText());
+            else Assertions.assertEquals(("(" + (year+2) + ")"), listYear.get(i).getText());
+
+    }
 }
