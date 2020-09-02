@@ -162,7 +162,7 @@ public class CH60xTitlesTestSuite {
     @Test
     public void t603shouldReturnCorrectTitles(ChromeDriver driver) {
 
-    //given
+        //given
         WebDriverWait wait = new WebDriverWait(driver, 5);
         driver.get("https://ta-ebookrental-fe.herokuapp.com/");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
@@ -191,7 +191,53 @@ public class CH60xTitlesTestSuite {
 
         for (int i = 0; i < listYear.size(); i++)  //Checking if year is correct
             if (i % 2 == 0) Assertions.assertEquals(("(" + year + ")"), listYear.get(i).getText());
-            else Assertions.assertEquals(("(" + (year+2) + ")"), listYear.get(i).getText());
+            else Assertions.assertEquals(("(" + (year + 2) + ")"), listYear.get(i).getText());
 
     }
+
+    @Test
+    public void t604shouldEditExistingTitle(ChromeDriver driver) {
+        doLogin(driver);
+        WebElement editButton = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div[2]/button");
+        editButton.click();
+        //edit title
+        WebElement titleInput = driver.findElement(By.xpath("//input[@name='title']"));
+        titleInput.clear();
+        titleInput.sendKeys(title + " " + 2);
+        WebElement authorInput = driver.findElement(By.xpath("//input[@name='author']"));
+        authorInput.clear();
+        authorInput.sendKeys(author + "ski");
+        WebElement yearInput = driver.findElement(By.xpath("//input[@name='year']"));
+        yearInput.clear();
+        yearInput.sendKeys("1888");
+        driver.findElement(By.xpath("//*[@name='submit-button']")).click();
+        //check if new user is edited
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+      //  wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
+
+        String chkTitles = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[1]").getText();
+        String chkAuthor = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[2]").getText();
+        String chkYear = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[3]").getText();
+        System.out.println(chkAuthor+"\n"+chkTitles+"\n"+chkYear);
+        Assertions.assertTrue(chkTitles.equalsIgnoreCase(title+" 2"));
+        Assertions.assertTrue(chkAuthor.equalsIgnoreCase("by "+author+"ski"));
+        Assertions.assertTrue(chkYear.equalsIgnoreCase("(1888)"));
+    }
+
+    public void doLogin(ChromeDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
+
+        //log in to system, I should get to titles page
+        WebElement log = driver.findElement(By.id("login"));
+        log.sendKeys(logingx);
+        WebElement pwd = driver.findElement(By.name("password"));
+        pwd.sendKeys(pwdgx);
+        WebElement button = driver.findElement(By.id("login-btn"));
+        button.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+    }
+
 }
