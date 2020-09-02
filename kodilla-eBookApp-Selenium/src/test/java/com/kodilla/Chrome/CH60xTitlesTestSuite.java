@@ -13,6 +13,7 @@ import io.github.bonigarcia.seljup.SeleniumExtension;
 
 import java.awt.*;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith(SeleniumExtension.class)
@@ -28,16 +29,7 @@ public class CH60xTitlesTestSuite {
     public void t601shouldAdd2NewTitle(ChromeDriver driver) {
         //given
         WebDriverWait wait = new WebDriverWait(driver, 5);
-        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
-
-        //log in to system, I should get to titles page
-        WebElement log = driver.findElement(By.id("login"));
-        log.sendKeys(logingx);
-        WebElement pwd = driver.findElement(By.name("password"));
-        pwd.sendKeys(pwdgx);
-        WebElement button = driver.findElement(By.id("login-btn"));
-        button.click();
+        doLogin(driver);
 
         //when
         //Adding new Title
@@ -89,16 +81,7 @@ public class CH60xTitlesTestSuite {
     public void t602shouldNotAddTitleWithEmptyFields(ChromeDriver driver) {
         //given
         WebDriverWait wait = new WebDriverWait(driver, 5);
-        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
-
-        //log in to system, I should get to titles page
-        WebElement log = driver.findElement(By.id("login"));
-        log.sendKeys(logingx);
-        WebElement pwd = driver.findElement(By.name("password"));
-        pwd.sendKeys(pwdgx);
-        WebElement button = driver.findElement(By.id("login-btn"));
-        button.click();
+        doLogin(driver);
 
         //when
         //Adding new Title
@@ -164,16 +147,7 @@ public class CH60xTitlesTestSuite {
 
         //given
         WebDriverWait wait = new WebDriverWait(driver, 5);
-        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
-
-        //log in to system, I should get to titles page
-        WebElement log = driver.findElement(By.id("login"));
-        log.sendKeys(logingx);
-        WebElement pwd = driver.findElement(By.name("password"));
-        pwd.sendKeys(pwdgx);
-        WebElement button = driver.findElement(By.id("login-btn"));
-        button.click();
+        doLogin(driver);
 
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
         List<WebElement> listTitles = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
@@ -213,31 +187,53 @@ public class CH60xTitlesTestSuite {
         driver.findElement(By.xpath("//*[@name='submit-button']")).click();
         //check if new user is edited
         WebDriverWait wait = new WebDriverWait(driver, 5);
-      //  wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+        //  wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
         driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
 
         String chkTitles = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[1]").getText();
         String chkAuthor = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[2]").getText();
         String chkYear = driver.findElementByXPath("//li[contains(@id,'title-')][1]/div/div[3]").getText();
-        System.out.println(chkAuthor+"\n"+chkTitles+"\n"+chkYear);
-        Assertions.assertTrue(chkTitles.equalsIgnoreCase(title+" 2"));
-        Assertions.assertTrue(chkAuthor.equalsIgnoreCase("by "+author+"ski"));
+        System.out.println(chkAuthor + "\n" + chkTitles + "\n" + chkYear);
+        Assertions.assertTrue(chkTitles.equalsIgnoreCase(title + " 2"));
+        Assertions.assertTrue(chkAuthor.equalsIgnoreCase("by " + author + "ski"));
         Assertions.assertTrue(chkYear.equalsIgnoreCase("(1888)"));
     }
 
-    public void doLogin(ChromeDriver driver) {
-        WebDriverWait wait = new WebDriverWait(driver, 5);
-        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
-
-        //log in to system, I should get to titles page
-        WebElement log = driver.findElement(By.id("login"));
-        log.sendKeys(logingx);
-        WebElement pwd = driver.findElement(By.name("password"));
-        pwd.sendKeys(pwdgx);
-        WebElement button = driver.findElement(By.id("login-btn"));
-        button.click();
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+    @Test
+    public void t604aShouldNotAllowYearWith7Chars(ChromeDriver driver) {
+        //given when
+        doLogin(driver);
+        driver.findElementByXPath("//li[contains(@id,'title-')][2]/div[2]/button").click();
+        WebElement yearInput = driver.findElement(By.xpath("//input[@name='year']"));
+        yearInput.clear();
+        yearInput.sendKeys("1234567");
+        driver.findElement(By.xpath("//*[@name='submit-button']")).click();
+        driver.manage().timeouts().implicitlyWait(2, TimeUnit.SECONDS);
+        //then
+        String chkYear = driver.findElementByXPath("//li[contains(@id,'title-')][2]/div/div[3]").getText();
+        System.out.println(chkYear);
+        Assertions.assertTrue(chkYear.equalsIgnoreCase("(1234567)"));
+        //I'm not sure if this makes sense
+        try {
+            Assertions.assertTrue(driver.findElementByCssSelector("[class*=alert--error]").isDisplayed());
+        } catch (Exception e){
+            System.out.println("no alert found");
+        }
     }
 
-}
+        public void doLogin (ChromeDriver driver){
+            WebDriverWait wait = new WebDriverWait(driver, 5);
+            driver.get("https://ta-ebookrental-fe.herokuapp.com/");
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
+
+            //log in to system, I should get to titles page
+            WebElement log = driver.findElement(By.id("login"));
+            log.sendKeys(logingx);
+            WebElement pwd = driver.findElement(By.name("password"));
+            pwd.sendKeys(pwdgx);
+            WebElement button = driver.findElement(By.id("login-btn"));
+            button.click();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+        }
+
+    }
