@@ -12,6 +12,7 @@ import org.junit.jupiter.api.*;
 import io.github.bonigarcia.seljup.SeleniumExtension;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +32,14 @@ public class CH60xTitlesTestSuite {
         WebDriverWait wait = new WebDriverWait(driver, 5);
         doLogin(driver);
 
+        //creating a list to verify whether correct number of titles was added
+        List<WebElement> listTitlesBefore = new ArrayList<>();  //just to make sure it works when list is empty
+        try {
+            listTitlesBefore = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
+        } catch (Exception e) {
+            System.out.println("no titles");
+        }
+
         //when
         //Adding new Title
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
@@ -46,6 +55,8 @@ public class CH60xTitlesTestSuite {
 
         //Adding second title
         driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
+
+
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("#add-title-button")));
         WebElement addTitle2 = driver.findElement(By.cssSelector("#add-title-button"));
         addTitle2.click();
@@ -62,18 +73,19 @@ public class CH60xTitlesTestSuite {
         List<WebElement> listTitles = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
         List<WebElement> listAuthor = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[2]");
         List<WebElement> listYear = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[3]");
+        int ls = listTitles.size();
         //then
-        Assertions.assertEquals(4, listTitles.size()); // List should contain 2 elements
-
-        for (int i = 0; i < listTitles.size(); i++)   // checking if titles are added correctly
-            if (i % 2 == 0) Assertions.assertTrue((title).equalsIgnoreCase(listTitles.get(i).getText()));
+        Assertions.assertEquals(listTitlesBefore.size() + 2, listTitles.size()); // List should contain 2 more elements
+        //Verifying last two added titles
+        for (int i = ls-1; i > ls-3; i--)   // checking if titles are added correctly
+            if (i == ls-2) Assertions.assertTrue((title).equalsIgnoreCase(listTitles.get(i).getText()));
             else Assertions.assertTrue((title + 2).equalsIgnoreCase((listTitles.get(i).getText())));
 
-        for (int i = 0; i < listAuthor.size(); i++)  // checking if author is correct
+        for (int i = ls-1; i > ls-2; i--)  // checking if author is correct
             Assertions.assertTrue(("by " + author).equalsIgnoreCase(listAuthor.get(i).getText()));
 
-        for (int i = 0; i < listYear.size(); i++)  //Checking if year is correct
-            if (i % 2 == 0) Assertions.assertEquals(("(" + year + ")"), listYear.get(i).getText());
+        for (int i = ls-1; i > ls-3; i--)  //Checking if year is correct
+            if (i == ls-2) Assertions.assertEquals(("(" + year + ")"), listYear.get(i).getText());
             else Assertions.assertEquals(("(" + newYear + ")"), listYear.get(i).getText());
     }
 
@@ -106,7 +118,7 @@ public class CH60xTitlesTestSuite {
         wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("[class*=icon-close]"))).click();
 
         //602b - Try Add Title with empty Author
-        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait below not always worked
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS); //Added Implicit wait because Explicit wait not always worked
 
         //We need list of authors before and after
         List<WebElement> listAuthorBefore = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[2]");
@@ -216,24 +228,51 @@ public class CH60xTitlesTestSuite {
         //I'm not sure if this makes sense
         try {
             Assertions.assertTrue(driver.findElementByCssSelector("[class*=alert--error]").isDisplayed());
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println("no alert found");
         }
     }
 
-        public void doLogin (ChromeDriver driver){
-            WebDriverWait wait = new WebDriverWait(driver, 5);
-            driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
+    @Test
+    public void t605shouldRemoveTitle(ChromeDriver driver) {
+        doLogin(driver);
 
-            //log in to system, I should get to titles page
-            WebElement log = driver.findElement(By.id("login"));
-            log.sendKeys(logingx);
-            WebElement pwd = driver.findElement(By.name("password"));
-            pwd.sendKeys(pwdgx);
-            WebElement button = driver.findElement(By.id("login-btn"));
-            button.click();
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+        //creating a list to verify whether correct number of titles was added
+        List<WebElement> listTitlesBefore = new ArrayList<>();  //just to make sure it works when list is empty
+        try {
+            listTitlesBefore = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
+        } catch (Exception e) {
+            System.out.println("no titles");
         }
+        //when
+        driver.findElementByXPath("//li[contains(@id,'title-')][1]/div[2]/button[2]").click(); //removes first title from the list
+        //there should be a confirm button, but is not
 
+        //then
+        //I know it's not happening, but assertion should be here
+        //Assertions.assertTrue(driver.findElementByCssSelector("[class*=alert--error]").isDisplayed());
+        driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
+        List<WebElement> listTitles = driver.findElementsByXPath("//li[contains(@id,'title-')]/div/div[1]");
+        for (WebElement n : listTitles
+             ) {
+            System.out.println(n.getText());
+        }
+        Assertions.assertEquals(listTitlesBefore.size()-1, listTitles.size());
     }
+
+    public void doLogin(ChromeDriver driver) {
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
+
+        //log in to system, I should get to titles page
+        WebElement log = driver.findElement(By.id("login"));
+        log.sendKeys(logingx);
+        WebElement pwd = driver.findElement(By.name("password"));
+        pwd.sendKeys(pwdgx);
+        WebElement button = driver.findElement(By.id("login-btn"));
+        button.click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+    }
+
+}
