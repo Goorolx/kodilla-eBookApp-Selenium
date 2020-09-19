@@ -21,18 +21,24 @@ public class CH70xItemTestSuite {
 
 
     @Test
-    public void t701shouldAddItemCorrect(){
+    public void t701shouldAddItemCorrect() {
 
         System.setProperty("webdriver.chrome.driver", "c://selenium-drivers/chrome/chromedriver.exe");
         WebDriver driver = new ChromeDriver();
-        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
-//        goToItems(driver);
-//
-//    }
-//
-//    public void goToItems(ChromeDriver driver) {
-        WebDriverWait wait = new WebDriverWait(driver, 5);
 
+        goToItems(driver);
+
+        WebDriverWait wait = new WebDriverWait(driver, 5);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("add-item-button"))).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.name("submit-button"))).click();
+
+    }
+
+    public void goToItems(WebDriver driver) {
+
+        driver.get("https://ta-ebookrental-fe.herokuapp.com/");
+
+        WebDriverWait wait = new WebDriverWait(driver, 5);
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login-btn")));
 
         //log in to system, I should get to titles page
@@ -43,6 +49,8 @@ public class CH70xItemTestSuite {
         WebElement button = driver.findElement(By.id("login-btn"));
         button.click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("titles")));
+
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//ul[contains(@class,'titles-list list')]/li/div[2]/a"))).click();
 
 
     }
