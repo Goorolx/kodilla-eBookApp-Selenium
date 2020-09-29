@@ -29,5 +29,28 @@ public class t20xTitleRestAssuredTestSuite {
                 .assertThat().body(hasItems("War and Peace","Lew Tołstoj","1869"));
 //TODO fix assertion above
     }
+    @Test
+    public void t203a_givenTitleUrl_whenPostNewTitleWithEmptyTitleField_thenFa(){
+        given().contentType("application/json")
+                .body(jsonStringTitleBuilder(210,"","John Doe",1999))
+                .post(titleUrl)
+                .then().statusCode(greaterThan(300)); // grater than 300 because all success responses are within range 200-299
+    }
+    @Test
+    public void t203b_givenTitleUrl_whenPostNewTitleWithEmptyAuthorField_thenFail(){
+        given().contentType("application/json")
+                .body(jsonStringTitleBuilder(210,"Random Title","",1999))
+                .post(titleUrl)
+                .then().statusCode(greaterThan(300));
+    }
+    @Test
+    public void t203c_givenTitleUrl_whenPostNewTitleWithEmptyYearField_thenFail(){
+        given().contentType("application/json")
+                .body(jsonStringTitleBuilder(210,"Random Title","John Doe",0))
+                .post(titleUrl)
+                .then().statusCode(greaterThan(300));
+        //TODO think about this one
+    }
+
 
 }
