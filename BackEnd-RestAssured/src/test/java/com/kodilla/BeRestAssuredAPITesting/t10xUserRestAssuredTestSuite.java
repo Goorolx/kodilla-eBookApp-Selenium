@@ -15,9 +15,12 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test
     public void t101_givenRegisterUrl_whenSuccessRegistration_thenResponseHasIdAndNewEqualsTrue() {
+        //given
         JSONObject json = new JSONObject()   //building Json with registration data
                 .put("login", "John Tester")
                 .put("password", "rudy1031");
+
+        //When + Then
         given()
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
@@ -29,28 +32,40 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test
     public void t102_givenLoginUrl_whenSuccessLogin_thenResponseUserId() {
+        //given
         JSONObject json = jsonObjectUserBuilder(testUser, testUsrPwd);
+
         given()
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
+
+        //when
                 .when().post(loginUrl)
+        //then
                 .then().statusCode(200)
                 .assertThat().body(is("210"));
     }
 
     @Test
     public void t103_givenLoginUrl_whenBadLoginGoodPassword_thenLoginFailed() {
+        //given
         JSONObject json = jsonObjectUserBuilder(testUser + "x", testUsrPwd);
+
+        //when + then
         given()
                 .contentType("application/json")
                 .body(json.toString())
+
                 .when().post(loginUrl)  //Dropped status verification as app returns 200 on failed login as well
                 .then().assertThat().body(is("-1")); //App returns -1 when failed login
     }
 
     @Test
     public void t104_givenLoginUrl_whenGoodLoginBadPassword_thenLoginFailed() {
+        //given
         JSONObject json = jsonObjectUserBuilder(testUser, testUsrPwd + "1");
+
+        //when + then
         given()
                 .contentType("application/json")
                 .body(json.toString())
@@ -60,7 +75,10 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test
     public void t105_givenRegisterUrl_whenRegistrationWithExistingUserAndDifferentPassword_thenError() {
+        //given
         JSONObject json = jsonObjectUserBuilder(testUser, "testtest");
+
+        //when + then
         given()
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
@@ -75,6 +93,7 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test(priority = 0)
     public void t106_givenRegisterUrl_whenSuccessRegistrationWithPolishCharacters_thenResponseHasIdAndNewEqualsTrue() {
+        //given
         JSONObject json = new JSONObject()   //building Json with registration data
                 .put("login", "Góroliść")
                 .put("password", "ródą102");
@@ -94,9 +113,11 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test(priority = 0)
     public void t107_givenLoginUrl_whenSuccessLoginWithPolishCharacters_thenResponseUserId() {
+        //given
         JSONObject json = new JSONObject()   //login
                 .put("login", "Góroliść")
                 .put("password", "ródą102");
+        //when + then
         given()
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
@@ -108,7 +129,10 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test
     public void givenUrl_whenSuccessOnGetsResponseAndJsonHasAuthor_thenCorrect() {
+        //given
         given()
+
+        //when + then
                 .when().get(baseUrl + "/titles/?userId=210")
                 .then().statusCode(200)
                 .assertThat().body("author", hasItems("John Doe"));
@@ -116,11 +140,14 @@ public class t10xUserRestAssuredTestSuite {
 
     @Test
     public void getUsrId() {
+        //given
         JSONObject json = jsonObjectUserBuilder(testUser, testUsrPwd);
+        //when
         String response = given().contentType("application/json").body(json.toString())
                         .when().post(loginUrl)
+        //then
                         .then().statusCode(200).extract().response().body().asString();
-       // usrId = (int) response.toString();
+                        // usrId = (int) response.toString();
         System.out.println(response);
     }
 }
