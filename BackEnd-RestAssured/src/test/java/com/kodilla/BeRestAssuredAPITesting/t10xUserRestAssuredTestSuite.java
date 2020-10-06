@@ -16,6 +16,9 @@ public class t10xUserRestAssuredTestSuite {
     @Test
     public void t101_givenRegisterUrl_whenSuccessRegistration_thenResponseHasIdAndNewEqualsTrue() {
         //given
+        int expectedHttpCode = 200;
+        int expectedId = 210;
+        boolean expectedIsUserNew = true;
         JSONObject json = new JSONObject()   //building Json with registration data
                 .put("login", "John Tester")
                 .put("password", "rudy1031");
@@ -25,25 +28,26 @@ public class t10xUserRestAssuredTestSuite {
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
                 .when().post(registerUrl)
-                .then().statusCode(200)
-                .assertThat().body("id", greaterThanOrEqualTo(210))  //last manually added user has id of 210+
-                .assertThat().body("new", is(true));  //when user already exists new is false
+                .then().statusCode(expectedHttpCode)
+                .assertThat().body("id", greaterThanOrEqualTo(expectedId))  //last manually added user has id of 210+
+                .assertThat().body("new", is(expectedIsUserNew));  //when user already exists new is false
     }
 
     @Test
     public void t102_givenLoginUrl_whenSuccessLogin_thenResponseUserId() {
         //given
         JSONObject json = jsonObjectUserBuilder(testUser, testUsrPwd);
+        int expectedHttpCode = 200;
+        String expectedId = "210";
 
+        //when
         given()
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
-
-        //when
                 .when().post(loginUrl)
         //then
-                .then().statusCode(200)
-                .assertThat().body(is("210"));
+                .then().statusCode(expectedHttpCode)
+                .assertThat().body(is(expectedId));
     }
 
     @Test
@@ -55,7 +59,6 @@ public class t10xUserRestAssuredTestSuite {
         given()
                 .contentType("application/json")
                 .body(json.toString())
-
                 .when().post(loginUrl)  //Dropped status verification as app returns 200 on failed login as well
                 .then().assertThat().body(is("-1")); //App returns -1 when failed login
     }
@@ -83,7 +86,8 @@ public class t10xUserRestAssuredTestSuite {
                 .contentType("application/json")  //another way to specify content type
                 .body(json.toString())
                 .when().post(registerUrl)
-                .then().log().ifStatusCodeIsEqualTo(200)
+                .then()
+                .log().ifStatusCodeIsEqualTo(200)
                 .statusCode(403);
 
         //trying to login using previous credentials, verifying if password is not overwritten, should login success
